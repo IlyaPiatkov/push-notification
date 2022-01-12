@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import uniqueId from "lodash.uniqueid";
 
 import { PushNotificationWithContext } from "./contexts";
+import { DURATION_EXIT } from "./constants";
 import { PushNotificationContent } from "./push-notification-content";
 
 export const PushNotification = ({ children }) => {
@@ -12,33 +13,22 @@ export const PushNotification = ({ children }) => {
   const createInstance = useCallback((options) => {
     const id = uniqueId("push-notification-");
 
-    const onCloseAllNote = () => {
-      setNotificationInstances((prevState) => ({
-        ...prevState,
-        [id]: {
-          ...prevState[id],
-          configs: []
-        }
-      }));
+    setNotificationInstances((prevState) => ({
+      ...prevState,
+      [id]: { configs: [], ...options }
+    }));
+
+    const removeInstance = () => {
+      setNotificationInstances(({ [id]: del, ...other }) => other);
     };
 
-    const onCloseNote = (noteId) => {
-      setNotificationInstances((prevState) => ({
-        ...prevState,
-        [id]: {
-          ...prevState[id],
-          configs: prevState[id].configs.filter((note) => note.id !== noteId)
-        }
-      }));
-    };
-
-    const onShownNote = (configId) => {
+    const onShownNote = (noteId) => {
       setNotificationInstances((prevState) => ({
         ...prevState,
         [id]: {
           ...prevState[id],
           configs: prevState[id].configs.map((config) => {
-            if (configId === config.id || configId === null) {
+            if (noteId === config.id || noteId === null) {
               return { ...config, shown: false };
             }
 
@@ -48,8 +38,31 @@ export const PushNotification = ({ children }) => {
       }));
     };
 
-    const removeInstance = () => {
-      setNotificationInstances(({ [id]: del, ...rest }) => rest);
+    const onCloseAllNote = () => {
+      onShownNote(null);
+
+      setTimeout(() => {
+        setNotificationInstances((prevState) => ({
+          ...prevState,
+          [id]: { ...prevState[id], configs: [] }
+        }));
+      }, DURATION_EXIT);
+    };
+
+    const onCloseNote = (noteId) => {
+      onShownNote(noteId);
+
+      setTimeout(() => {
+        setNotificationInstances((prevState) => ({
+          ...prevState,
+          [id]: {
+            ...prevState[id],
+            configs: prevState[id].configs.filter(
+              (config) => config.id !== noteId
+            )
+          }
+        }));
+      }, DURATION_EXIT);
     };
 
     const onCreateNote = (note) => {
@@ -68,19 +81,14 @@ export const PushNotification = ({ children }) => {
             ...prevState[id],
             configs: [
               ...prevState[id].configs,
-              { ...note, onCloseNote, onCloseAllNote, onShownNote, shown: true }
+              { ...note, onCloseNote, onCloseAllNote, shown: true }
             ]
           }
         };
       });
     };
 
-    setNotificationInstances((prevState) => ({
-      ...prevState,
-      [id]: { configs: [], ...options }
-    }));
-
-    return { onCreateNote, removeInstance };
+    return { onCreateNote, removeInstance, onCloseNote, onCloseAllNote };
   }, []);
 
   const content = Object.entries(notificationInstances).map(([id, options]) => {

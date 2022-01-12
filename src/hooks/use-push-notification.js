@@ -23,7 +23,9 @@ export const usePushNotification = (param) => {
 
   const callbacks = useRef({
     removeInstance: noop,
-    onCreateNote: noop
+    onCreateNote: noop,
+    onCloseNote: noop,
+    onCloseAllNote: noop
   });
 
   const { createInstance } = usePushNotificationContext();
@@ -37,6 +39,8 @@ export const usePushNotification = (param) => {
   }, []);
 
   return {
-    onCreateNote: (config) => callbacks.current.onCreateNote(config)
+    onCreateNote: (config) => callbacks.current.onCreateNote(config),
+    onCloseNote: (noteId) => callbacks.current.onCloseNote(noteId),
+    onCloseAllNote: () => callbacks.current.onCloseAllNote()
   };
 };

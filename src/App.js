@@ -28,7 +28,9 @@ const testFn = () => {
 };
 
 const Content1 = () => {
-  const { onCreateNote } = usePushNotification({ maxNote: -3 });
+  const { onCreateNote, onCloseNote, onCloseAllNote } = usePushNotification({
+    maxNote: -3
+  });
 
   const onClick1 = useCallback(() => {
     const id = uniqueId();
@@ -108,6 +110,14 @@ const Content1 = () => {
       <Button onClick={onClick3}>SUCCESS</Button>
       <Button onClick={onClick4}>warning</Button>
       <Button onClick={onClick5}>Static id</Button>
+      <Button onClick={onCloseAllNote}>Close All Note</Button>
+      <Button
+        onClick={() => {
+          onCloseNote("staticId");
+        }}
+      >
+        Close Note(staticId)
+      </Button>
     </div>
   );
 };

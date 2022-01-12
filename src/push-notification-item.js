@@ -14,7 +14,6 @@ export const PushNotificationItem = memo(function PushNotificationItem({
   body,
   shown,
   message,
-  onShownNote,
   onCloseNote,
   onCloseAllNote,
   status = Status.DEFAULT,
@@ -22,7 +21,6 @@ export const PushNotificationItem = memo(function PushNotificationItem({
   autoHideTimeout = 0,
   buttonProps
 }) {
-  // const [shown, setShown] = useState(true);
   const [busy, setBusy] = useState(false);
 
   const timeout = useRef();
@@ -35,29 +33,27 @@ export const PushNotificationItem = memo(function PushNotificationItem({
     "push-notification-item__container_warning": status === Status.WARNING
   });
 
-  const onClose = async (event) => {
-    const callback = buttonProps?.onClose(event);
+  const _onClose = async () => {
+    const handler = buttonProps?.handler;
+    const callback = handler instanceof Function ? handler() : null;
 
     if (callback && callback instanceof Promise) {
-      console.log("promise");
-
       setBusy(true);
       await callback;
       setBusy(false);
     }
-
-    onShownNote(id);
-    setTimeout(() => {
-      onCloseNote(id);
-    }, DURATION_EXIT);
   };
 
-  const onCloseAll = () => {
-    onShownNote(null);
+  const onClose = async () => {
+    await _onClose();
 
-    setTimeout(() => {
-      onCloseAllNote(id);
-    }, DURATION_EXIT);
+    onCloseNote(id);
+  };
+
+  const onCloseAll = async () => {
+    await _onClose();
+
+    onCloseAllNote();
   };
 
   const onEnteringCallback = useCallback((element) => {
