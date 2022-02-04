@@ -38,32 +38,38 @@ export const PushNotification = ({ children }) => {
       }));
     };
 
-    const onCloseAllNote = () => {
-      onShownNote(null);
+    const onCloseAllNote = () =>
+      new Promise((resolve) => {
+        onShownNote(null);
 
-      setTimeout(() => {
-        setNotificationInstances((prevState) => ({
-          ...prevState,
-          [id]: { ...prevState[id], configs: [] }
-        }));
-      }, DURATION_EXIT);
-    };
+        setTimeout(() => {
+          setNotificationInstances((prevState) => ({
+            ...prevState,
+            [id]: { ...prevState[id], configs: [] }
+          }));
 
-    const onCloseNote = (noteId) => {
-      onShownNote(noteId);
+          resolve();
+        }, DURATION_EXIT);
+      });
 
-      setTimeout(() => {
-        setNotificationInstances((prevState) => ({
-          ...prevState,
-          [id]: {
-            ...prevState[id],
-            configs: prevState[id].configs.filter(
-              (config) => config.id !== noteId
-            )
-          }
-        }));
-      }, DURATION_EXIT);
-    };
+    const onCloseNote = (noteId) =>
+      new Promise((resolve) => {
+        onShownNote(noteId);
+
+        setTimeout(() => {
+          setNotificationInstances((prevState) => ({
+            ...prevState,
+            [id]: {
+              ...prevState[id],
+              configs: prevState[id].configs.filter(
+                (config) => config.id !== noteId
+              )
+            }
+          }));
+
+          resolve();
+        }, DURATION_EXIT);
+      });
 
     const onCreateNote = (note) => {
       setNotificationInstances((prevState) => {

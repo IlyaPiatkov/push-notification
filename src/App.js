@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import uniqueId from "lodash.uniqueid";
+import debounce from "lodash.debounce";
 import Button from "@material-ui/core/Button";
 
 import { PushNotification } from "./push-notification";
@@ -103,6 +104,18 @@ const Content1 = () => {
     });
   }, [onCreateNote]);
 
+  const onClick6 = useCallback(async () => {
+    await onCloseAllNote();
+    onCreateNote({
+      message: "test2",
+      id: uniqueId(),
+      buttonProps: {
+        caption: "Close",
+        onClose: testFn
+      }
+    });
+  }, [onCreateNote, onCloseAllNote]);
+
   return (
     <div className="buttons">
       <Button onClick={onClick1}>DEFAULT</Button>
@@ -111,6 +124,8 @@ const Content1 = () => {
       <Button onClick={onClick4}>warning</Button>
       <Button onClick={onClick5}>Static id</Button>
       <Button onClick={onCloseAllNote}>Close All Note</Button>
+      <Button onClick={onClick6}>Chain of Note</Button>
+
       <Button
         onClick={() => {
           onCloseNote("staticId");
